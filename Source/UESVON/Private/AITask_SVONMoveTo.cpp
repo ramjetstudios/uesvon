@@ -12,10 +12,6 @@
 #include <Runtime/Engine/Public/VisualLogger/VisualLogger.h>
 #include <Runtime/GameplayTasks/Classes/GameplayTasksComponent.h>
 
-//#include "UObject/Package.h"
-//#include "TimerManager.h"
-//#include "AISystem.h"
-
 UAITask_SVONMoveTo::UAITask_SVONMoveTo(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {

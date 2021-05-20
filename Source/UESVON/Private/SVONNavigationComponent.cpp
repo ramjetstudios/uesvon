@@ -233,7 +233,7 @@ void USVONNavigationComponent::DebugLocalPosition(FVector& aPosition)
 		{
 			FIntVector pos;
 			SVONMediator::GetVolumeXYZ(GetPawnPosition(), *myCurrentNavVolume, i, pos);
-			uint_fast64_t code = morton3D_64_encode(pos.X, pos.Y, pos.Z);
+			uint_fast64_t code = libmorton::morton3D_64_encode(pos.X, pos.Y, pos.Z);
 			FString codeString = FString::FromInt(code);
 			DrawDebugString(GetWorld(), GetPawnPosition() + FVector(0.f, 0.f, i * 50.0f), pos.ToString() + " - " + codeString, NULL, FColor::White, 0.01f);
 		}

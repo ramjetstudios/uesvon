@@ -186,7 +186,7 @@ bool ASVONVolume::GetNodePosition(layerindex_t aLayer, mortoncode_t aCode, FVect
 {
 	float voxelSize = GetVoxelSize(aLayer);
 	uint_fast32_t x, y, z;
-	morton3D_64_decode(aCode, x, y, z);
+	libmorton::morton3D_64_decode(aCode, x, y, z);
 	oPosition = myOrigin - myExtent + FVector(x * voxelSize, y * voxelSize, z * voxelSize) + FVector(voxelSize * 0.5f);
 	return true;
 }
@@ -202,7 +202,7 @@ bool ASVONVolume::GetLinkPosition(const SVONLink& aLink, FVector& oPosition) con
 	{
 		float voxelSize = GetVoxelSize(0);
 		uint_fast32_t x, y, z;
-		morton3D_64_decode(aLink.GetSubnodeIndex(), x, y, z);
+		libmorton::morton3D_64_decode(aLink.GetSubnodeIndex(), x, y, z);
 		oPosition += FVector(x * voxelSize * 0.25f, y * voxelSize * 0.25f, z * voxelSize * 0.25f) - FVector(voxelSize * 0.375);
 		const SVONLeafNode& leafNode = GetLeafNode(node.myFirstChild.myNodeIndex);
 		bool isBlocked = leafNode.GetNode(aLink.GetSubnodeIndex());
@@ -252,7 +252,7 @@ void ASVONVolume::GetLeafNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNe
 
 	// Get our starting co-ordinates
 	uint_fast32_t x = 0, y = 0, z = 0;
-	morton3D_64_decode(leafIndex, x, y, z);
+	libmorton::morton3D_64_decode(leafIndex, x, y, z);
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -264,7 +264,7 @@ void ASVONVolume::GetLeafNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNe
 		// If the neighbour is in bounds of this leaf node
 		if (sX >= 0 && sX < 4 && sY >= 0 && sY < 4 && sZ >= 0 && sZ < 4)
 		{
-			mortoncode_t thisIndex = morton3D_64_encode(sX, sY, sZ);
+			mortoncode_t thisIndex = libmorton::morton3D_64_encode(sX, sY, sZ);
 			// If this node is blocked, then no link in this direction, continue
 			if (leaf.GetNode(thisIndex))
 			{
@@ -310,7 +310,7 @@ void ASVONVolume::GetLeafNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNe
 				else if (sZ > 3)
 					sZ = 0;
 				//
-				mortoncode_t subNodeCode = morton3D_64_encode(sX, sY, sZ);
+				mortoncode_t subNodeCode = libmorton::morton3D_64_encode(sX, sY, sZ);
 
 				// Only return the neighbour if it isn't blocked!
 				if (!leafNode.GetNode(subNodeCode))
@@ -473,7 +473,7 @@ void ASVONVolume::BuildNeighbourLinks(layerindex_t aLayer)
 		SVONNode& node = layer[i];
 		// Get our world co-ordinate
 		uint_fast32_t x, y, z;
-		morton3D_64_decode(node.myCode, x, y, z);
+		libmorton::morton3D_64_decode(node.myCode, x, y, z);
 		nodeindex_t backtrackIndex = -1;
 		nodeindex_t index = i;
 		FVector nodePos;
@@ -514,7 +514,7 @@ bool ASVONVolume::FindLinkInDirection(layerindex_t aLayer, const nodeindex_t aNo
 
 	// Get our world co-ordinate
 	uint_fast32_t x = 0, y = 0, z = 0;
-	morton3D_64_decode(node.myCode, x, y, z);
+	libmorton::morton3D_64_decode(node.myCode, x, y, z);
 	int32 sX = x, sY = y, sZ = z;
 	// Add the direction
 	sX += SVONStatics::dirs[aDir].X;
@@ -538,7 +538,7 @@ bool ASVONVolume::FindLinkInDirection(layerindex_t aLayer, const nodeindex_t aNo
 	y = sY;
 	z = sZ;
 	// Get the morton code for the direction
-	mortoncode_t thisCode = morton3D_64_encode(x, y, z);
+	mortoncode_t thisCode = libmorton::morton3D_64_encode(x, y, z);
 	bool isHigher = thisCode > node.myCode;
 	int32 nodeDelta = (isHigher ? 1 : -1);
 
@@ -589,7 +589,7 @@ void ASVONVolume::RasterizeLeafNode(FVector& aOrigin, nodeindex_t aLeafIndex)
 	{
 
 		uint_fast32_t x, y, z;
-		morton3D_64_decode(i, x, y, z);
+		libmorton::morton3D_64_decode(i, x, y, z);
 		float leafVoxelSize = GetVoxelSize(0) * 0.25f;
 		FVector position = aOrigin + FVector(x * leafVoxelSize, y * leafVoxelSize, z * leafVoxelSize) + FVector(leafVoxelSize * 0.5f);
 

@@ -42,7 +42,7 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 		z = voxel.Z;
 
 		// Get the morton code we want for this layer
-		mortoncode_t code = morton3D_64_encode(x, y, z);
+		mortoncode_t code = libmorton::morton3D_64_encode(x, y, z);
 
 		for (nodeindex_t j = nodeIndex; j < layer.Num(); j++)
 		{
@@ -82,7 +82,7 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 					oLink.myLayerIndex = 0; // Layer 0 (leaf)
 					oLink.myNodeIndex = j;	// This index
 
-					mortoncode_t leafIndex = morton3D_64_encode(coord.X, coord.Y, coord.Z); // This morton code is our key into the 64-bit leaf node
+					mortoncode_t leafIndex = libmorton::morton3D_64_encode(coord.X, coord.Y, coord.Z); // This morton code is our key into the 64-bit leaf node
 
 					if (leaf.GetNode(leafIndex))
 						return false; // This voxel is blocked, oops!
