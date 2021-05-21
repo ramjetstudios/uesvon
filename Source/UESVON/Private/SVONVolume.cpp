@@ -42,17 +42,17 @@ bool ASVONVolume::Generate()
 #if WITH_EDITOR
 	// Needed for debug rendering
 	GetWorld()->PersistentLineBatcher->SetComponentTickEnabled(false);
+	
+	myDebugPosition = GetWorld()->ViewLocationsRenderedLastFrame[0];
 
 	// If we're running the game, use the first player controller position for debugging
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc)
 	{
-		myDebugPosition = pc->GetPawn()->GetActorLocation();
-	}
-	// otherwise, use the viewport camera location if we're just in the editor
-	else if (GetWorld()->ViewLocationsRenderedLastFrame.Num() > 0)
-	{
-		myDebugPosition = GetWorld()->ViewLocationsRenderedLastFrame[0];
+		if(APawn* Pawn = pc->GetPawn())
+		{
+			myDebugPosition = Pawn->GetActorLocation();
+		}
 	}
 
 	FlushPersistentDebugLines(GetWorld());
