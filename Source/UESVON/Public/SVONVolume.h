@@ -38,13 +38,6 @@ public:
 
 	//~ End AActor Interface
 
-#if WITH_EDITOR
-	//~ Begin UObject Interface
-	void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	void PostEditUndo() override;
-	//~ End UObject Interface
-#endif // WITH_EDITOR 
-
 	//~ Begin UObject 
 	void Serialize(FArchive& Ar) override;
 	//~ End UObject 
@@ -54,17 +47,17 @@ public:
 
 	bool IsReadyForNavigation() const;
 
-	const TArray<SVONNode>& GetLayer(layerindex_t aLayer) const
+	const TArray<FSVONNode>& GetLayer(uint8 aLayer) const
 	{
 		return myData.myLayers[aLayer];
 	};
-	const SVONNode& GetNode(const SVONLink& aLink) const;
-	const SVONLeafNode& GetLeafNode(nodeindex_t aIndex) const;
-	bool GetLinkPosition(const SVONLink& aLink, FVector& oPosition) const;
-	bool GetNodePosition(layerindex_t aLayer, mortoncode_t aCode, FVector& oPosition) const;
-	void GetLeafNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNeighbours) const;
-	void GetNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNeighbours) const;
-	float GetVoxelSize(layerindex_t aLayer) const;
+	const FSVONNode& GetNode(const FSVONLink& aLink) const;
+	const FSVONLeafNode& GetLeafNode(int32 aIndex) const;
+	bool GetLinkPosition(const FSVONLink& aLink, FVector& oPosition) const;
+	bool GetNodePosition(uint8 aLayer, uint64 aCode, FVector& oPosition) const;
+	void GetLeafNeighbours(const FSVONLink& aLink, TArray<FSVONLink>& oNeighbours) const;
+	void GetNeighbours(const FSVONLink& aLink, TArray<FSVONLink>& oNeighbours) const;
+	float GetVoxelSize(uint8 aLayer) const;
 
 	const uint8 GetMyNumLayers() const
 	{
@@ -103,16 +96,16 @@ public:
 
 private:
 	// The navigation data
-	SVONData myData;
+	FSVONData myData;
 	// temporary data used during nav data generation first pass rasterize
-	TArray<TSet<mortoncode_t>> myBlockedIndices;
+	TArray<TSet<uint64>> myBlockedIndices;
 	// Helper members
 	FVector myOrigin;
 	FVector myExtent;
 	// Used for defining debug visualiation range
 	FVector myDebugPosition;
 
-	TArray<SVONNode>& GetLayer(layerindex_t aLayer)
+	TArray<FSVONNode>& GetLayer(uint8 aLayer)
 	{
 		return myData.myLayers[aLayer];
 	};
@@ -123,16 +116,16 @@ private:
 
 	// Generation methods
 	bool FirstPassRasterize();
-	void RasterizeLayer(layerindex_t aLayer);
-	void BuildNeighbourLinks(layerindex_t aLayer);
-	bool FindLinkInDirection(layerindex_t aLayer, const nodeindex_t aNodeIndex, uint8 aDir, SVONLink& oLinkToUpdate, FVector& aStartPosForDebug);
-	void RasterizeLeafNode(FVector& aOrigin, nodeindex_t aLeafIndex);
+	void RasterizeLayer(uint8 aLayer);
+	void BuildNeighbourLinks(uint8 aLayer);
+	bool FindLinkInDirection(uint8 aLayer, const int32 aNodeIndex, uint8 aDir, FSVONLink& oLinkToUpdate, FVector& aStartPosForDebug);
+	void RasterizeLeafNode(FVector& aOrigin, int32 aLeafIndex);
 
-	bool GetIndexForCode(layerindex_t aLayer, mortoncode_t aCode, nodeindex_t& oIndex) const;
-	bool IsAnyMemberBlocked(layerindex_t aLayer, mortoncode_t aCode) const;
+	bool GetIndexForCode(uint8 aLayer, uint64 aCode, int32& oIndex) const;
+	bool IsAnyMemberBlocked(uint8 aLayer, uint64 aCode) const;
 	bool IsBlocked(const FVector& aPosition, const float aSize) const;
-	int32 GetNumNodesInLayer(layerindex_t aLayer) const;
-	int32 GetNumNodesPerSide(layerindex_t aLayer) const;
+	int32 GetNumNodesInLayer(uint8 aLayer) const;
+	int32 GetNumNodesPerSide(uint8 aLayer) const;
 
 	bool IsInDebugRange(const FVector& aPosition) const;
 };

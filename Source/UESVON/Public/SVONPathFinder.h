@@ -3,82 +3,70 @@
 #include "SVONLink.h"
 #include "SVONNavigationPath.h"
 #include "UESVON/Public/SVONTypes.h"
+#include "SVONPathFinder.generated.h"
 
-class ASVONVolume;
-
-struct FNavigationPath;
-struct FSVONNavigationPath;
-struct SVONLink;
-
-struct SVONPathFinderSettings
+USTRUCT(BlueprintType)
+struct FSVONPathFinderSettings
 {
-	bool myDebugOpenNodes;
-	bool myUseUnitCost;
-	float myUnitCost;
-	float myEstimateWeight;
-	float myNodeSizeCompensation;
-	int mySmoothingIterations;
-	ESVONPathCostType myPathCostType;
-	TArray<FVector> myDebugPoints;
+	GENERATED_BODY()
 
-	SVONPathFinderSettings()
-		: myDebugOpenNodes(false)
-		  , myUseUnitCost(false)
-		  , myUnitCost(1.0f)
-		  , myEstimateWeight(1.0f)
-		  , myNodeSizeCompensation(1.0f)
-		  , mySmoothingIterations(0.f)
-		  , myPathCostType(ESVONPathCostType::EUCLIDEAN)
-	{
-	}
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	bool myDebugOpenNodes = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	bool myUseUnitCost = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	float myUnitCost = 1.f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	float myEstimateWeight = 1.f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	float myNodeSizeCompensation = 1.f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	int mySmoothingIterations = 0.f;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	ESVONPathCostType myPathCostType = ESVONPathCostType::Euclidean;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="SVON")
+	TArray<FVector> myDebugPoints;
 };
 
-class UESVON_API SVONPathFinder
+USTRUCT(BlueprintType)
+struct UESVON_API FSVONPathFinder
 {
-public:
-	SVONPathFinder(UWorld* aWorld, const ASVONVolume& aVolume, SVONPathFinderSettings& aSettings)
-		: myVolume(aVolume)
-		  , mySettings(aSettings)
-		  , myWorld(aWorld)
-	{
-	};
-
-	~SVONPathFinder()
-	{
-	};
+	GENERATED_BODY()
+	
+	FSVONPathFinder() {}
+	FSVONPathFinder(ASVONVolume* aVolume, FSVONPathFinderSettings& aSettings) : Volume(aVolume), mySettings(aSettings) {}
 
 	/* Performs an A* search from start to target navlink */
-	int FindPath(const SVONLink& aStart, const SVONLink& aTarget, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath);
+	int FindPath(const FSVONLink& aStart, const FSVONLink& aTarget, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath);
 
 private:
-	TArray<SVONLink> myOpenSet;
-	TSet<SVONLink> myClosedSet;
+	TArray<FSVONLink> myOpenSet;
+	TSet<FSVONLink> myClosedSet;
 
-	TMap<SVONLink, SVONLink> myCameFrom;
+	TMap<FSVONLink, FSVONLink> myCameFrom;
 
-	TMap<SVONLink, float> myGScore;
-	TMap<SVONLink, float> myFScore;
+	TMap<FSVONLink, float> myGScore;
+	TMap<FSVONLink, float> myFScore;
 
-	SVONLink myStart;
-	SVONLink myCurrent;
-	SVONLink myGoal;
+	FSVONLink myStart;
+	FSVONLink myCurrent;
+	FSVONLink myGoal;
 
-	const ASVONVolume& myVolume;
+	UPROPERTY(VisibleInstanceOnly, Category="SVON")
+	ASVONVolume* Volume = nullptr;
 
-	SVONPathFinderSettings& mySettings;
-
-	UWorld* myWorld;
+	FSVONPathFinderSettings mySettings;
 
 	/* A* heuristic calculation */
-	float HeuristicScore(const SVONLink& aStart, const SVONLink& aTarget);
+	float HeuristicScore(const FSVONLink& aStart, const FSVONLink& aTarget);
 
 	/* Distance between two links */
-	float GetCost(const SVONLink& aStart, const SVONLink& aTarget);
+	float GetCost(const FSVONLink& aStart, const FSVONLink& aTarget);
 
-	void ProcessLink(const SVONLink& aNeighbour);
+	void ProcessLink(const FSVONLink& aNeighbour);
 
 	/* Constructs the path by navigating back through our CameFrom map */
-	void BuildPath(TMap<SVONLink, SVONLink>& aCameFrom, SVONLink aCurrent, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath);
+	void BuildPath(TMap<FSVONLink, FSVONLink>& aCameFrom, FSVONLink aCurrent, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath);
 
 	/*void Smooth_Chaikin(TArray<FVector>& somePoints, int aNumIterations);*/
 };

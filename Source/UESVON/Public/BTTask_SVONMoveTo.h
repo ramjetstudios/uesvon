@@ -5,7 +5,6 @@
 #include "BTTask_SVONMoveTo.generated.h"
 
 class UAITask_SVONMoveTo;
-class UBlackboardComponent;
 
 struct FBTSVONMoveToTaskMemory
 {

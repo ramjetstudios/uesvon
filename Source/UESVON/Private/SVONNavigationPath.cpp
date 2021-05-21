@@ -14,7 +14,7 @@ void FSVONNavigationPath::ResetForRepath()
 	myPoints.Empty();
 }
 
-void FSVONNavigationPath::DebugDraw(UWorld* aWorld, const ASVONVolume& aVolume)
+void FSVONNavigationPath::DebugDraw(UWorld* aWorld, ASVONVolume* aVolume)
 {
 #if WITH_EDITORONLY_DATA
 	for (int i = 0; i < myPoints.Num(); i++)
@@ -24,9 +24,9 @@ void FSVONNavigationPath::DebugDraw(UWorld* aWorld, const ASVONVolume& aVolume)
 		if (i < myPoints.Num() - 1)
 		{
 			FVector offSet(0.f);
-			const float size = point.myLayer == 0 ? aVolume.GetVoxelSize(point.myLayer) * 0.25f : aVolume.GetVoxelSize(point.myLayer) * 0.5f;
+			const float size = point.myLayer == 0 ? aVolume->GetVoxelSize(point.myLayer) * 0.25f : aVolume->GetVoxelSize(point.myLayer) * 0.5f;
 
-			DrawDebugBox(aWorld, point.myPosition, FVector(size), SVONStatics::myLinkColors[point.myLayer], true, -1.f, 0, 30.f);
+			DrawDebugBox(aWorld, point.myPosition, FVector(size), USVONStatics::myLinkColors[point.myLayer], true, -1.f, 0, 30.f);
 			DrawDebugSphere(aWorld, point.myPosition + offSet, 30.f, 20, FColor::Cyan, true, -1.f, 0, 100.f);
 		}
 	}

@@ -1,52 +1,56 @@
 #pragma once
 #include "SVONDefines.h"
+#include "SVONLink.generated.h"
 
-struct UESVON_API SVONLink
+USTRUCT(BlueprintType)
+struct FSVONLink
 {
-	layerindex_t myLayerIndex:4;
-	nodeindex_t myNodeIndex:22;
-	subnodeindex_t mySubnodeIndex:6;
+	GENERATED_BODY()
 
-	SVONLink()
+	uint8 myLayerIndex:4;
+	uint32 myNodeIndex:22;
+	uint8 mySubnodeIndex:6;
+
+	FSVONLink()
 		: myLayerIndex(15),
 		  myNodeIndex(0),
 		  mySubnodeIndex(0)
 	{
 	}
 
-	SVONLink(layerindex_t aLayer, nodeindex_t aNodeIndex, subnodeindex_t aSubNodeIndex)
+	FSVONLink(uint8 aLayer, int32 aNodeIndex, uint8 aSubNodeIndex)
 		: myLayerIndex(aLayer),
 		  myNodeIndex(aNodeIndex),
 		  mySubnodeIndex(aSubNodeIndex)
 	{
 	}
 
-	layerindex_t GetLayerIndex() const
+	uint8 GetLayerIndex() const
 	{
 		return myLayerIndex;
 	}
 
-	void SetLayerIndex(const layerindex_t aLayerIndex)
+	void SetLayerIndex(const uint8 aLayerIndex)
 	{
 		myLayerIndex = aLayerIndex;
 	}
 
-	nodeindex_t GetNodeIndex() const
+	int32 GetNodeIndex() const
 	{
 		return myNodeIndex;
 	}
 
-	void SetNodeIndex(const nodeindex_t aNodeIndex)
+	void SetNodeIndex(const int32 aNodeIndex)
 	{
 		myNodeIndex = aNodeIndex;
 	}
 
-	subnodeindex_t GetSubnodeIndex() const
+	uint8 GetSubnodeIndex() const
 	{
 		return mySubnodeIndex;
 	}
 
-	void SetSubnodeIndex(const subnodeindex_t aSubnodeIndex)
+	void SetSubnodeIndex(const uint8 aSubnodeIndex)
 	{
 		mySubnodeIndex = aSubnodeIndex;
 	}
@@ -61,14 +65,14 @@ struct UESVON_API SVONLink
 		myLayerIndex = 15;
 	}
 
-	bool operator==(const SVONLink& aOther) const
+	bool operator==(const FSVONLink& aOther) const
 	{
-		return memcmp(this, &aOther, sizeof(SVONLink)) == 0;
+		return memcmp(this, &aOther, sizeof(FSVONLink)) == 0;
 	}
 
-	static SVONLink GetInvalidLink()
+	static FSVONLink GetInvalidLink()
 	{
-		return SVONLink(15, 0, 0);
+		return FSVONLink(15, 0, 0);
 	}
 
 	FString ToString()
@@ -77,14 +81,14 @@ struct UESVON_API SVONLink
 	};
 };
 
-FORCEINLINE uint32 GetTypeHash(const SVONLink& b)
+FORCEINLINE uint32 GetTypeHash(const FSVONLink& b)
 {
 	return HashCombine(HashCombine(GetTypeHash(b.myLayerIndex), GetTypeHash(b.myNodeIndex)), GetTypeHash(b.mySubnodeIndex));
 }
 
 
-FORCEINLINE FArchive& operator <<(FArchive& Ar, SVONLink& aSVONLink)
+FORCEINLINE FArchive& operator <<(FArchive& Ar, FSVONLink& aSVONLink)
 {
-	Ar.Serialize(&aSVONLink, sizeof(SVONLink));
+	Ar.Serialize(&aSVONLink, sizeof(FSVONLink));
 	return Ar;
 }

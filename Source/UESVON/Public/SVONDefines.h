@@ -1,12 +1,6 @@
 #pragma once
-
-#include <Runtime/AIModule/Classes/AITypes.h>
-
-typedef uint8 layerindex_t;
-typedef int32 nodeindex_t;
-typedef uint8 subnodeindex_t;
-typedef uint64 mortoncode_t;
-typedef uint32 posint_t;
+#include "AITypes.h"
+#include "SVONDefines.generated.h"
 
 UENUM(BlueprintType)
 enum class EBuildTrigger : uint8
@@ -15,50 +9,46 @@ enum class EBuildTrigger : uint8
 	Manual UMETA(DisplayName = "Manual")
 };
 
-enum class dir : uint8
-{
-	pX,
-	nX,
-	pY,
-	nY,
-	pZ,
-	nZ
-};
-
 #define LEAF_LAYER_INDEX 14;
 
-class UESVON_API SVONStatics
+UCLASS(BlueprintType)
+class UESVON_API USVONStatics : public UObject
 {
+	GENERATED_BODY()
+	
 public:
 	static const FIntVector dirs[];
-	static const nodeindex_t dirChildOffsets[6][4];
-	static const nodeindex_t dirLeafChildOffsets[6][16];
+	static const int32 dirChildOffsets[6][4];
+	static const int32 dirLeafChildOffsets[6][16];
 	static const FColor myLayerColors[];
 	static const FColor myLinkColors[];
 };
 
 UENUM(BlueprintType)
-namespace ESVONPathfindingRequestResult
+enum class ESVONPathfindingRequestResult : uint8
 {
-enum Type
-{
-	Failed,		   // Something went wrong
-	ReadyToPath,   // Pre-reqs satisfied
-	AlreadyAtGoal, // No need to move
-	Deferred,	   // Passed request to another thread, need to wait
-	Success		   // it worked!
+	Failed,
+	// Something went wrong
+	ReadyToPath,
+	// Pre-reqs satisfied
+	AlreadyAtGoal,
+	// No need to move
+	Deferred,
+	// Passed request to another thread, need to wait
+	Success // it worked!
 };
-}
 
-struct UESVON_API FSVONPathfindingRequestResult
+USTRUCT(BlueprintType)
+struct FSVONPathfindingRequestResult
 {
-	FAIRequestID MoveId;
-	TEnumAsByte<ESVONPathfindingRequestResult::Type> Code;
+	GENERATED_BODY()
+	
+	FAIRequestID MoveId = FAIRequestID::InvalidRequest;
+	UPROPERTY(BlueprintReadOnly, Category="SVON")
+	ESVONPathfindingRequestResult Code = ESVONPathfindingRequestResult::Failed;
 
-	FSVONPathfindingRequestResult()
-		: MoveId(FAIRequestID::InvalidRequest)
-		, Code(ESVONPathfindingRequestResult::Failed)
+	operator ESVONPathfindingRequestResult() const
 	{
+		return Code;
 	}
-	operator ESVONPathfindingRequestResult::Type() const { return Code; }
 };

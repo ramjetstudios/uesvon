@@ -3,7 +3,7 @@
 
 void FSVONFindPathTask::DoWork()
 {
-	SVONPathFinder pathFinder(myWorld, myVolume, mySettings);
+	FSVONPathFinder pathFinder(myVolume, mySettings);
 
 	int result = pathFinder.FindPath(myStart, myTarget, myStartPos, myTargetPos, myPath);
 

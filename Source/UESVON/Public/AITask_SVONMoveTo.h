@@ -7,10 +7,6 @@
 #include "UESVON/Public/SVONTypes.h"
 #include "AITask_SVONMoveTo.generated.h"
 
-class AAIController;
-class USVONNavigationComponent;
-struct FSVONNavigationPath;
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FSVONMoveTaskCompletedSignature, TEnumAsByte<EPathFollowingResult::Type>, Result, AAIController*, AIController);
 
 UCLASS()
@@ -101,7 +97,8 @@ protected:
 
 	FSVONPathfindingRequestResult myResult;
 
-	USVONNavigationComponent* myNavComponent;
+	UPROPERTY()
+	class USVONNavigationComponent* myNavComponent;
 
 	void CheckPathPreConditions();
 

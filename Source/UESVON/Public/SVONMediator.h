@@ -1,12 +1,17 @@
 #pragma once
+#include "SVONMediator.generated.h"
 
-class ASVONVolume;
-struct SVONLink;
+struct FSVONLink;
 
-class UESVON_API SVONMediator
+UCLASS(BlueprintType)
+class UESVON_API USVONMediator : public UObject
 {
+	GENERATED_BODY()
+	
 public:
-	static bool GetLinkFromPosition(const FVector& aPosition, const ASVONVolume& aVolume, SVONLink& oLink);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SVON")
+	static bool GetLinkFromPosition(const FVector& aPosition, const class ASVONVolume* aVolume, FSVONLink& oLink);
 
-	static void GetVolumeXYZ(const FVector& aPosition, const ASVONVolume& aVolume, const int aLayer, FIntVector& oXYZ);
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category="SVON")
+	static void GetVolumeXYZ(const FVector& aPosition, const class ASVONVolume* aVolume, const int aLayer, FIntVector& oXYZ);
 };

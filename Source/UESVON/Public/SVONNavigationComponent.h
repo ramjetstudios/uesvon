@@ -7,9 +7,6 @@
 #include "UESVON/Public/SVONTypes.h"
 #include "SVONNavigationComponent.generated.h"
 
-class ASVONVolume;
-struct SVONLink;
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class UESVON_API USVONNavigationComponent : public UActorComponent
 {
@@ -32,18 +29,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SVO Navigation | Heuristics")
 	float NodeSizeCompensation = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SVO Navigation | Heuristics")
-	ESVONPathCostType PathCostType = ESVONPathCostType::EUCLIDEAN;
+	ESVONPathCostType PathCostType = ESVONPathCostType::Euclidean;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SVO Navigation | Smoothing")
 	int SmoothingIterations = 0;
 
 	// Sets default values for this component's properties
 	USVONNavigationComponent(const FObjectInitializer& ObjectInitializer);
 
-public:
-	const ASVONVolume* GetCurrentVolume() const { return myCurrentNavVolume; }
+	const ASVONVolume* GetCurrentVolume() const { return CurrentNavVolume; }
 
 	// Get a Nav position
-	SVONLink GetNavPosition(FVector& aPosition) const;
+	FSVONLink GetNavPosition(FVector& aPosition) const;
 	virtual FVector GetPawnPosition() const;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -55,23 +51,22 @@ public:
 	UFUNCTION(BlueprintCallable, Category = UESVON)
 	void FindPathImmediate(const FVector &aStartPosition, const FVector &aTargetPosition, TArray<FVector>& OutPathPoints);
 
-	FSVONNavPathSharedPtr& GetPath() { return mySVONPath; }
+	FSVONNavPathSharedPtr& GetPath() { return SVONPath; }
 
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
-	// The current navigation volume
-	ASVONVolume* myCurrentNavVolume;
+	UFUNCTION(BlueprintCallable, Category="SVON")
 	bool HasNavData() const;
-
-	// Check the scene for a valid volume that I am within the extents of
+	UFUNCTION(BlueprintCallable, Category="SVON")
 	bool FindVolume();
 
+protected:
+	// The current navigation volume
+	UPROPERTY()
+	ASVONVolume* CurrentNavVolume;
+
 	// Print current layer/morton code information
-	void DebugLocalPosition(FVector& aPosition);
+	void DebugLocalPosition();
 
-	FSVONNavPathSharedPtr mySVONPath;
+	FSVONNavPathSharedPtr SVONPath;
 
-	mutable SVONLink myLastLocation;
+	mutable FSVONLink LastLocation;
 };

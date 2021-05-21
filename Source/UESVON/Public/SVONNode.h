@@ -2,27 +2,30 @@
 
 #include "CoreMinimal.h"
 #include "SVONLink.h"
-#include "SVONDefines.h"
+#include "SVONNode.generated.h"
 
-struct UESVON_API SVONNode
+USTRUCT(BlueprintType)
+struct FSVONNode
 {
-	mortoncode_t myCode;
+	GENERATED_BODY()
+	
+	uint64 myCode;
 
-	SVONLink myParent;
-	SVONLink myFirstChild;
+	FSVONLink myParent;
+	FSVONLink myFirstChild;
 
-	SVONLink myNeighbours[6];
+	FSVONLink myNeighbours[6];
 
-	SVONNode() :
+	FSVONNode() :
 		myCode(0),
-		myParent(SVONLink::GetInvalidLink()),
-		myFirstChild(SVONLink::GetInvalidLink()) {}
+		myParent(FSVONLink::GetInvalidLink()),
+		myFirstChild(FSVONLink::GetInvalidLink()) {}
 
 	bool HasChildren() const { return myFirstChild.IsValid(); }
 
 };
 
-FORCEINLINE FArchive &operator <<(FArchive &Ar, SVONNode& aSVONNode)
+FORCEINLINE FArchive &operator <<(FArchive &Ar, FSVONNode& aSVONNode)
 {
 	Ar << aSVONNode.myCode;
 	Ar << aSVONNode.myParent;

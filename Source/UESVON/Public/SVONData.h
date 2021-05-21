@@ -2,12 +2,16 @@
 
 #include "UESVON/Public/SVONLeafNode.h"
 #include "UESVON/Public/SVONNode.h"
+#include "SVONData.generated.h"
 
-struct SVONData
+USTRUCT(BlueprintType)
+struct FSVONData
 {
+	GENERATED_BODY()
+	
 	// SVO data
-	TArray<TArray<SVONNode>> myLayers;
-	TArray<SVONLeafNode> myLeafNodes;
+	TArray<TArray<FSVONNode>> myLayers;
+	TArray<FSVONLeafNode> myLeafNodes;
 
 	void Reset()
 	{
@@ -15,20 +19,20 @@ struct SVONData
 		myLeafNodes.Empty();
 	}
 
-	int GetSize()
+	int GetSize() const
 	{
 		int result = 0;
-		result += myLeafNodes.Num() * sizeof(SVONLeafNode);
+		result += myLeafNodes.Num() * sizeof(FSVONLeafNode);
 		for (int i = 0; i < myLayers.Num(); i++)
 		{
-			result += myLayers[i].Num() * sizeof(SVONNode);
+			result += myLayers[i].Num() * sizeof(FSVONNode);
 		}
 
 		return result;
 	}
 };
 
-FORCEINLINE FArchive& operator<<(FArchive& Ar, SVONData& aSVONData)
+FORCEINLINE FArchive& operator<<(FArchive& Ar, FSVONData& aSVONData)
 {
 	Ar << aSVONData.myLayers;
 	Ar << aSVONData.myLeafNodes;

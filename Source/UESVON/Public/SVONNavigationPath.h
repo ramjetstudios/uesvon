@@ -1,17 +1,18 @@
 #pragma once
+#include "SVONNavigationPath.generated.h"
 
 UENUM(BlueprintType)
 enum class ESVONPathCostType : uint8
 {
-	MANHATTAN,
-	EUCLIDEAN
+	Manhattan,
+	Euclidean
 };
 
-struct FNavigationPath;
-class ASVONVolume;
-
-struct UESVON_API FSVONPathPoint
+USTRUCT(BlueprintType)
+struct FSVONPathPoint
 {
+	GENERATED_BODY()
+	
 	FSVONPathPoint()
 		: myPosition(FVector())
 		, myLayer(-1)
@@ -27,14 +28,15 @@ struct UESVON_API FSVONPathPoint
 	int myLayer;		// Layer that the point came from (so we can infer it's volume)
 };
 
-struct UESVON_API FSVONNavigationPath
+USTRUCT(BlueprintType)
+struct FSVONNavigationPath
 {
-
-public:
+	GENERATED_BODY()
+	
 	void AddPoint(const FSVONPathPoint& aPoint);
 	void ResetForRepath();
 
-	void DebugDraw(UWorld* aWorld, const ASVONVolume& aVolume);
+	void DebugDraw(UWorld* aWorld, class ASVONVolume* aVolume);
 
 	const TArray<FSVONPathPoint>& GetPathPoints() const
 	{
@@ -50,6 +52,6 @@ public:
 	void CreateNavPath(FNavigationPath& aOutPath);
 
 protected:
-	bool myIsReady;
+	bool myIsReady = false;
 	TArray<FSVONPathPoint> myPoints;
 };

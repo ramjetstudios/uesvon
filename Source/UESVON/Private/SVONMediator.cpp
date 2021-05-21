@@ -4,15 +4,15 @@
 #include "UESVON/Public/SVONLink.h"
 #include "UESVON/Public/SVONVolume.h"
 
-bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolume& aVolume, SVONLink& oLink)
+bool USVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolume* aVolume, FSVONLink& oLink)
 {
 	// Position is outside the volume, no can do
-	if (!aVolume.EncompassesPoint(aPosition))
+	if (!aVolume->EncompassesPoint(aPosition))
 	{
 		return false;
 	}
 
-	FBox box = aVolume.GetComponentsBoundingBox(true);
+	FBox box = aVolume->GetComponentsBoundingBox(true);
 
 	FVector origin;
 	FVector extent;
@@ -23,13 +23,13 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 	// The local position of the point in volume space
 	FVector localPos = aPosition - zOrigin;
 
-	int layerIndex = aVolume.GetMyNumLayers() - 1;
-	nodeindex_t nodeIndex = 0;
-	while (layerIndex >= 0 && layerIndex < aVolume.GetMyNumLayers())
+	int layerIndex = aVolume->GetMyNumLayers() - 1;
+	int32 nodeIndex = 0;
+	while (layerIndex >= 0 && layerIndex < aVolume->GetMyNumLayers())
 	{
 		// Get the layer and voxel size
 
-		const TArray<SVONNode>& layer = aVolume.GetLayer(layerIndex);
+		const TArray<FSVONNode>& layer = aVolume->GetLayer(layerIndex);
 		// Calculate the XYZ coordinates
 
 		FIntVector voxel;
@@ -40,11 +40,11 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 		z = voxel.Z;
 
 		// Get the morton code we want for this layer
-		mortoncode_t code = libmorton::morton3D_64_encode(x, y, z);
+		uint64 code = libmorton::morton3D_64_encode(x, y, z);
 
-		for (nodeindex_t j = nodeIndex; j < layer.Num(); j++)
+		for (int32 j = nodeIndex; j < layer.Num(); j++)
 		{
-			const SVONNode& node = layer[j];
+			const FSVONNode& node = layer[j];
 			// This is the node we are in
 			if (node.myCode == code)
 			{
@@ -60,12 +60,12 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 				// If this is a leaf node, we need to find our subnode
 				if (layerIndex == 0)
 				{
-					const SVONLeafNode& leaf = aVolume.GetLeafNode(node.myFirstChild.myNodeIndex);
+					const FSVONLeafNode& leaf = aVolume->GetLeafNode(node.myFirstChild.myNodeIndex);
 					// We need to calculate the node local position to get the morton code for the leaf
-					float voxelSize = aVolume.GetVoxelSize(layerIndex);
+					float voxelSize = aVolume->GetVoxelSize(layerIndex);
 					// The world position of the 0 node
 					FVector nodePosition;
-					aVolume.GetNodePosition(layerIndex, node.myCode, nodePosition);
+					aVolume->GetNodePosition(layerIndex, node.myCode, nodePosition);
 					// The morton origin of the node
 					FVector nodeOrigin = nodePosition - FVector(voxelSize * 0.5f);
 					// The requested position, relative to the node origin
@@ -80,7 +80,7 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 					oLink.myLayerIndex = 0; // Layer 0 (leaf)
 					oLink.myNodeIndex = j;	// This index
 
-					mortoncode_t leafIndex = libmorton::morton3D_64_encode(coord.X, coord.Y, coord.Z); // This morton code is our key into the 64-bit leaf node
+					uint64 leafIndex = libmorton::morton3D_64_encode(coord.X, coord.Y, coord.Z); // This morton code is our key into the 64-bit leaf node
 
 					if (leaf.GetNode(leafIndex))
 						return false; // This voxel is blocked, oops!
@@ -102,9 +102,9 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 	return false;
 }
 
-void SVONMediator::GetVolumeXYZ(const FVector& aPosition, const ASVONVolume& aVolume, const int aLayer, FIntVector& oXYZ)
+void USVONMediator::GetVolumeXYZ(const FVector& aPosition, const ASVONVolume* aVolume, const int aLayer, FIntVector& oXYZ)
 {
-	FBox box = aVolume.GetComponentsBoundingBox(true);
+	FBox box = aVolume->GetComponentsBoundingBox(true);
 
 	FVector origin;
 	FVector extent;
@@ -118,7 +118,7 @@ void SVONMediator::GetVolumeXYZ(const FVector& aPosition, const ASVONVolume& aVo
 	int layerIndex = aLayer;
 
 	// Get the layer and voxel size
-	float voxelSize = aVolume.GetVoxelSize(layerIndex);
+	float voxelSize = aVolume->GetVoxelSize(layerIndex);
 
 	// Calculate the XYZ coordinates
 

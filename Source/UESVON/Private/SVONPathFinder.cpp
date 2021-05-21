@@ -5,14 +5,14 @@
 #include "UESVON.h"
 #include "SVONNavigationPath.h"
 
-int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath)
+int FSVONPathFinder::FindPath(const FSVONLink& aStart, const FSVONLink& aGoal, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath)
 {
 	myOpenSet.Empty();
 	myClosedSet.Empty();
 	myCameFrom.Empty();
 	myFScore.Empty();
 	myGScore.Empty();
-	myCurrent = SVONLink();
+	myCurrent = FSVONLink();
 	myGoal = aGoal;
 	myStart = aStart;
 
@@ -26,7 +26,7 @@ int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, cons
 	while (myOpenSet.Num() > 0)
 	{
 		float lowestScore = FLT_MAX;
-		for (SVONLink& link : myOpenSet)
+		for (FSVONLink& link : myOpenSet)
 		{
 			if (!myFScore.Contains(link) || myFScore[link] < lowestScore)
 			{
@@ -47,20 +47,20 @@ int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, cons
 			return 1;
 		}
 
-		const SVONNode& currentNode = myVolume.GetNode(myCurrent);
+		const FSVONNode& currentNode = Volume->GetNode(myCurrent);
 
-		TArray<SVONLink> neighbours;
+		TArray<FSVONLink> neighbours;
 
 		if (myCurrent.GetLayerIndex() == 0 && currentNode.myFirstChild.IsValid())
 		{
-			myVolume.GetLeafNeighbours(myCurrent, neighbours);
+			Volume->GetLeafNeighbours(myCurrent, neighbours);
 		}
 		else
 		{
-			myVolume.GetNeighbours(myCurrent, neighbours);
+			Volume->GetNeighbours(myCurrent, neighbours);
 		}
 
-		for (const SVONLink& neighbour : neighbours)
+		for (const FSVONLink& neighbour : neighbours)
 		{
 			ProcessLink(neighbour);
 		}
@@ -73,31 +73,31 @@ int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, cons
 	return 0;
 }
 
-float SVONPathFinder::HeuristicScore(const SVONLink& aStart, const SVONLink& aTarget)
+float FSVONPathFinder::HeuristicScore(const FSVONLink& aStart, const FSVONLink& aTarget)
 {
 	/* Just using manhattan distance for now */
-	float score = 0.f;
+	float score;
 
 	FVector startPos, endPos;
-	myVolume.GetLinkPosition(aStart, startPos);
-	myVolume.GetLinkPosition(aTarget, endPos);
+	Volume->GetLinkPosition(aStart, startPos);
+	Volume->GetLinkPosition(aTarget, endPos);
 	switch (mySettings.myPathCostType)
 	{
-	case ESVONPathCostType::MANHATTAN: score = FMath::Abs(endPos.X - startPos.X) + FMath::Abs(endPos.Y - startPos.Y) + FMath::Abs(endPos.Z - startPos.Z);
+	case ESVONPathCostType::Manhattan: score = FMath::Abs(endPos.X - startPos.X) + FMath::Abs(endPos.Y - startPos.Y) + FMath::Abs(endPos.Z - startPos.Z);
 		break;
-	case ESVONPathCostType::EUCLIDEAN:
+	case ESVONPathCostType::Euclidean:
 	default: score = (startPos - endPos).Size();
 		break;
 	}
 
-	score *= (1.0f - (static_cast<float>(aTarget.GetLayerIndex()) / static_cast<float>(myVolume.GetMyNumLayers())) * mySettings.myNodeSizeCompensation);
+	score *= (1.0f - (static_cast<float>(aTarget.GetLayerIndex()) / static_cast<float>(Volume->GetMyNumLayers())) * mySettings.myNodeSizeCompensation);
 
 	return score;
 }
 
-float SVONPathFinder::GetCost(const SVONLink& aStart, const SVONLink& aTarget)
+float FSVONPathFinder::GetCost(const FSVONLink& aStart, const FSVONLink& aTarget)
 {
-	float cost = 0.f;
+	float cost;
 
 	// Unit cost implementation
 	if (mySettings.myUseUnitCost)
@@ -107,19 +107,17 @@ float SVONPathFinder::GetCost(const SVONLink& aStart, const SVONLink& aTarget)
 	else
 	{
 		FVector startPos(0.f), endPos(0.f);
-		const SVONNode& startNode = myVolume.GetNode(aStart);
-		const SVONNode& endNode = myVolume.GetNode(aTarget);
-		myVolume.GetLinkPosition(aStart, startPos);
-		myVolume.GetLinkPosition(aTarget, endPos);
+		Volume->GetLinkPosition(aStart, startPos);
+		Volume->GetLinkPosition(aTarget, endPos);
 		cost = (startPos - endPos).Size();
 	}
 
-	cost *= (1.0f - (static_cast<float>(aTarget.GetLayerIndex()) / static_cast<float>(myVolume.GetMyNumLayers())) * mySettings.myNodeSizeCompensation);
+	cost *= (1.0f - (static_cast<float>(aTarget.GetLayerIndex()) / static_cast<float>(Volume->GetMyNumLayers())) * mySettings.myNodeSizeCompensation);
 
 	return cost;
 }
 
-void SVONPathFinder::ProcessLink(const SVONLink& aNeighbour)
+void FSVONPathFinder::ProcessLink(const FSVONLink& aNeighbour)
 {
 	if (aNeighbour.IsValid())
 	{
@@ -133,7 +131,7 @@ void SVONPathFinder::ProcessLink(const SVONLink& aNeighbour)
 			if (mySettings.myDebugOpenNodes)
 			{
 				FVector pos;
-				myVolume.GetLinkPosition(aNeighbour, pos);
+				Volume->GetLinkPosition(aNeighbour, pos);
 				mySettings.myDebugPoints.Add(pos);
 			}
 		}
@@ -153,7 +151,7 @@ void SVONPathFinder::ProcessLink(const SVONLink& aNeighbour)
 	}
 }
 
-void SVONPathFinder::BuildPath(TMap<SVONLink, SVONLink>& aCameFrom, SVONLink aCurrent, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath)
+void FSVONPathFinder::BuildPath(TMap<FSVONLink, FSVONLink>& aCameFrom, FSVONLink aCurrent, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath)
 {
 	FSVONPathPoint pos;
 
@@ -165,9 +163,9 @@ void SVONPathFinder::BuildPath(TMap<SVONLink, SVONLink>& aCameFrom, SVONLink aCu
 	while (aCameFrom.Contains(aCurrent) && !(aCurrent == aCameFrom[aCurrent]))
 	{
 		aCurrent = aCameFrom[aCurrent];
-		myVolume.GetLinkPosition(aCurrent, pos.myPosition);
+		Volume->GetLinkPosition(aCurrent, pos.myPosition);
 		points.Add(pos);
-		const SVONNode& node = myVolume.GetNode(aCurrent);
+		const FSVONNode& node = Volume->GetNode(aCurrent);
 		// This is rank. I really should sort the layers out
 		if (aCurrent.GetLayerIndex() == 0)
 		{

@@ -4,15 +4,12 @@
 #include "UESVON/Public/SVONPathFinder.h"
 #include "UESVON/Public/SVONTypes.h"
 
-class ASVONVolume;
-struct SVONPathFinderSettings;
-
 class FSVONFindPathTask : public FNonAbandonableTask
 {
 	friend class FAutoDeleteAsyncTask<FSVONFindPathTask>;
 
 public:
-	FSVONFindPathTask(ASVONVolume& aVolume, SVONPathFinderSettings& aSettings, UWorld* aWorld, const SVONLink aStart, const SVONLink aTarget, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath, FThreadSafeBool& aCompleteFlag)
+	FSVONFindPathTask(ASVONVolume* aVolume, FSVONPathFinderSettings& aSettings, UWorld* aWorld, const FSVONLink aStart, const FSVONLink aTarget, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath, FThreadSafeBool& aCompleteFlag)
 		: myVolume(aVolume)
 		, myWorld(aWorld)
 		, myStart(aStart)
@@ -26,16 +23,16 @@ public:
 	}
 
 protected:
-	ASVONVolume& myVolume;
+	ASVONVolume* myVolume;
 	UWorld* myWorld;
 
-	SVONLink myStart;
-	SVONLink myTarget;
+	FSVONLink myStart;
+	FSVONLink myTarget;
 	FVector myStartPos;
 	FVector myTargetPos;
 	FSVONNavPathSharedPtr* myPath;
 
-	SVONPathFinderSettings mySettings;
+	FSVONPathFinderSettings mySettings;
 
 	FThreadSafeBool& myCompleteFlag;
 

@@ -3,7 +3,6 @@
 #include "AIController.h"
 #include "AIResources.h"
 #include "AISystem.h"
-#include "GameplayTasksComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"

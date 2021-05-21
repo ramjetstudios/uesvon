@@ -17,20 +17,14 @@ USVONNavigationComponent::USVONNavigationComponent(const FObjectInitializer& Obj
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	myLastLocation = SVONLink(0, 0, 0);
+	LastLocation = FSVONLink(0, 0, 0);
 
-	mySVONPath = MakeShareable<FSVONNavigationPath>(new FSVONNavigationPath());
-}
-
-// Called when the game starts
-void USVONNavigationComponent::BeginPlay()
-{
-	Super::BeginPlay();
+	SVONPath = MakeShareable<FSVONNavigationPath>(new FSVONNavigationPath());
 }
 
 bool USVONNavigationComponent::HasNavData() const
 {
-	return myCurrentNavVolume && GetOwner() && myCurrentNavVolume->EncompassesPoint(GetPawnPosition()) && myCurrentNavVolume->GetMyNumLayers() > 0;
+	return CurrentNavVolume && GetOwner() && CurrentNavVolume->EncompassesPoint(GetPawnPosition()) && CurrentNavVolume->GetMyNumLayers() > 0;
 }
 
 bool USVONNavigationComponent::FindVolume()
@@ -44,7 +38,7 @@ bool USVONNavigationComponent::FindVolume()
 		ASVONVolume* volume = Cast<ASVONVolume>(actor);
 		if (volume && volume->EncompassesPoint(GetPawnPosition()))
 		{
-			myCurrentNavVolume = volume;
+			CurrentNavVolume = volume;
 			return true;
 		}
 	}
@@ -61,36 +55,37 @@ void USVONNavigationComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		FindVolume();
 	}
-	else if (myCurrentNavVolume->IsReadyForNavigation()) // && !myIsBusy)
+	else if (CurrentNavVolume->IsReadyForNavigation()) // && !myIsBusy)
 	{
 		FVector location = GetPawnPosition();
 		if (DebugPrintMortonCodes)
 		{
-			DebugLocalPosition(location);
+			DebugLocalPosition();
 		}
-		SVONLink link = GetNavPosition(location);
+		FSVONLink link = GetNavPosition(location);
 	}
 }
-SVONLink USVONNavigationComponent::GetNavPosition(FVector& aPosition) const
+
+FSVONLink USVONNavigationComponent::GetNavPosition(FVector& aPosition) const
 {
-	SVONLink navLink;
+	FSVONLink navLink;
 	if (HasNavData())
 	{
 		// Get the nav link from our volume
-		SVONMediator::GetLinkFromPosition(GetOwner()->GetActorLocation(), *myCurrentNavVolume, navLink);
+		USVONMediator::GetLinkFromPosition(GetOwner()->GetActorLocation(), CurrentNavVolume, navLink);
 
-		if (navLink == myLastLocation)
+		if (navLink == LastLocation)
 			return navLink;
 
-		myLastLocation = navLink;
+		LastLocation = navLink;
 
 #if WITH_EDITORONLY_DATA
 		if (DebugPrintCurrentPosition)
 		{
-			const SVONNode& currentNode = myCurrentNavVolume->GetNode(navLink);
+			const FSVONNode& currentNode = CurrentNavVolume->GetNode(navLink);
 			FVector currentNodePosition;
 
-			bool isValid = myCurrentNavVolume->GetLinkPosition(navLink, currentNodePosition);
+			bool isValid = CurrentNavVolume->GetLinkPosition(navLink, currentNodePosition);
 
 			DrawDebugLine(GetWorld(), GetPawnPosition(), currentNodePosition, isValid ? FColor::Green : FColor::Red, false, -1.f, 0, 10.f);
 			DrawDebugString(GetWorld(), GetPawnPosition() + FVector(0.f, 0.f, -50.f), navLink.ToString(), NULL, FColor::Yellow, 0.01f);
@@ -105,12 +100,12 @@ bool USVONNavigationComponent::FindPathAsync(const FVector& aStartPosition, cons
 #if WITH_EDITOR
 	UE_LOG(UESVON, Log, TEXT("Finding path from %s and %s"), *aStartPosition.ToString(), *aTargetPosition.ToString());
 #endif
-	SVONLink startNavLink;
-	SVONLink targetNavLink;
+	FSVONLink startNavLink;
+	FSVONLink targetNavLink;
 	if (HasNavData())
 	{
 		// Get the nav link from our volume
-		if (!SVONMediator::GetLinkFromPosition(aStartPosition, *myCurrentNavVolume, startNavLink))
+		if (!USVONMediator::GetLinkFromPosition(aStartPosition, CurrentNavVolume, startNavLink))
 		{
 #if WITH_EDITOR
 			UE_LOG(UESVON, Error, TEXT("Path finder failed to find start nav link. Is your pawn blocking the channel you've selected to generate the nav data with?"));
@@ -118,7 +113,7 @@ bool USVONNavigationComponent::FindPathAsync(const FVector& aStartPosition, cons
 			return false;
 		}
 
-		if (!SVONMediator::GetLinkFromPosition(aTargetPosition, *myCurrentNavVolume, targetNavLink))
+		if (!USVONMediator::GetLinkFromPosition(aTargetPosition, CurrentNavVolume, targetNavLink))
 		{
 #if WITH_EDITOR
 			UE_LOG(UESVON, Error, TEXT("Path finder failed to find target nav link"));
@@ -126,7 +121,7 @@ bool USVONNavigationComponent::FindPathAsync(const FVector& aStartPosition, cons
 			return false;
 		}
 
-		SVONPathFinderSettings settings;
+		FSVONPathFinderSettings settings;
 		settings.myUseUnitCost = UseUnitCost;
 		settings.myUnitCost = UnitCost;
 		settings.myEstimateWeight = EstimateWeight;
@@ -134,7 +129,7 @@ bool USVONNavigationComponent::FindPathAsync(const FVector& aStartPosition, cons
 		settings.myPathCostType = PathCostType;
 		settings.mySmoothingIterations = SmoothingIterations;
 
-		(new FAutoDeleteAsyncTask<FSVONFindPathTask>(*myCurrentNavVolume, settings, GetWorld(), startNavLink, targetNavLink, aStartPosition, aTargetPosition, oNavPath, aCompleteFlag))->StartBackgroundTask();
+		(new FAutoDeleteAsyncTask<FSVONFindPathTask>(CurrentNavVolume, settings, GetWorld(), startNavLink, targetNavLink, aStartPosition, aTargetPosition, oNavPath, aCompleteFlag))->StartBackgroundTask();
 
 		return true;
 	}
@@ -153,12 +148,12 @@ bool USVONNavigationComponent::FindPathImmediate(const FVector& aStartPosition, 
 	UE_LOG(UESVON, Log, TEXT("Finding path immediate from %s and %s"), *aStartPosition.ToString(), *aTargetPosition.ToString());
 #endif
 
-	SVONLink startNavLink;
-	SVONLink targetNavLink;
+	FSVONLink startNavLink;
+	FSVONLink targetNavLink;
 	if (HasNavData())
 	{
 		// Get the nav link from our volume
-		if (!SVONMediator::GetLinkFromPosition(aStartPosition, *myCurrentNavVolume, startNavLink))
+		if (!USVONMediator::GetLinkFromPosition(aStartPosition, CurrentNavVolume, startNavLink))
 		{
 #if WITH_EDITOR
 			UE_LOG(UESVON, Error, TEXT("Path finder failed to find start nav link"));
@@ -166,7 +161,7 @@ bool USVONNavigationComponent::FindPathImmediate(const FVector& aStartPosition, 
 			return false;
 		}
 
-		if (!SVONMediator::GetLinkFromPosition(aTargetPosition, *myCurrentNavVolume, targetNavLink))
+		if (!USVONMediator::GetLinkFromPosition(aTargetPosition, CurrentNavVolume, targetNavLink))
 		{
 #if WITH_EDITOR
 			UE_LOG(UESVON, Error, TEXT("Path finder failed to find target nav link"));
@@ -186,7 +181,7 @@ bool USVONNavigationComponent::FindPathImmediate(const FVector& aStartPosition, 
 
 		path->ResetForRepath();
 
-		SVONPathFinderSettings settings;
+		FSVONPathFinderSettings settings;
 		settings.myUseUnitCost = UseUnitCost;
 		settings.myUnitCost = UnitCost;
 		settings.myEstimateWeight = EstimateWeight;
@@ -194,7 +189,7 @@ bool USVONNavigationComponent::FindPathImmediate(const FVector& aStartPosition, 
 		settings.myPathCostType = PathCostType;
 		settings.mySmoothingIterations = SmoothingIterations;
 
-		SVONPathFinder pathFinder(GetWorld(), *myCurrentNavVolume, settings);
+		FSVONPathFinder pathFinder(CurrentNavVolume, settings);
 
 		int result = pathFinder.FindPath(startNavLink, targetNavLink, aStartPosition, aTargetPosition, oNavPath);
 
@@ -214,25 +209,24 @@ bool USVONNavigationComponent::FindPathImmediate(const FVector& aStartPosition, 
 
 void USVONNavigationComponent::FindPathImmediate(const FVector& aStartPosition, const FVector& aTargetPosition, TArray<FVector>& OutPathPoints)
 {
-	FindPathImmediate(aStartPosition, aTargetPosition, &mySVONPath);
+	FindPathImmediate(aStartPosition, aTargetPosition, &SVONPath);
 
 	OutPathPoints.Empty();
 
-	for (const FSVONPathPoint& PathPoint : mySVONPath->GetPathPoints())
+	for (const FSVONPathPoint& PathPoint : SVONPath->GetPathPoints())
 	{
 		OutPathPoints.Emplace(PathPoint.myPosition);
 	}
 }
 
-void USVONNavigationComponent::DebugLocalPosition(FVector& aPosition)
+void USVONNavigationComponent::DebugLocalPosition()
 {
-
 	if (HasNavData())
 	{
-		for (int i = 0; i < myCurrentNavVolume->GetMyNumLayers() - 1; i++)
+		for (int i = 0; i < CurrentNavVolume->GetMyNumLayers() - 1; i++)
 		{
 			FIntVector pos;
-			SVONMediator::GetVolumeXYZ(GetPawnPosition(), *myCurrentNavVolume, i, pos);
+			USVONMediator::GetVolumeXYZ(GetPawnPosition(), CurrentNavVolume, i, pos);
 			uint64 code = libmorton::morton3D_64_encode(pos.X, pos.Y, pos.Z);
 			FString codeString = FString::FromInt(code);
 			DrawDebugString(GetWorld(), GetPawnPosition() + FVector(0.f, 0.f, i * 50.0f), pos.ToString() + " - " + codeString, NULL, FColor::White, 0.01f);
