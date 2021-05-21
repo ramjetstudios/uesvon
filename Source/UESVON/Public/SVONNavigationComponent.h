@@ -5,9 +5,6 @@
 #include "UESVON/Public/SVONLink.h"
 #include "UESVON/Public/SVONNavigationPath.h"
 #include "UESVON/Public/SVONTypes.h"
-
-#include <Runtime/Engine/Classes/Components/ActorComponent.h>
-
 #include "SVONNavigationComponent.generated.h"
 
 class ASVONVolume;

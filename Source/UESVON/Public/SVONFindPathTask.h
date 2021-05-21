@@ -4,9 +4,6 @@
 #include "UESVON/Public/SVONPathFinder.h"
 #include "UESVON/Public/SVONTypes.h"
 
-#include <Runtime/Core/Public/Async/AsyncWork.h>
-#include <Runtime/Core/Public/HAL/ThreadSafeBool.h>
-
 class ASVONVolume;
 struct SVONPathFinderSettings;
 

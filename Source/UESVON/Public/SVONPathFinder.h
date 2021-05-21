@@ -1,6 +1,7 @@
-
 #pragma once
 
+#include "SVONLink.h"
+#include "SVONNavigationPath.h"
 #include "UESVON/Public/SVONTypes.h"
 
 class ASVONVolume;
@@ -22,12 +23,12 @@ struct SVONPathFinderSettings
 
 	SVONPathFinderSettings()
 		: myDebugOpenNodes(false)
-		, myUseUnitCost(false)
-		, myUnitCost(1.0f)
-		, myEstimateWeight(1.0f)
-		, myNodeSizeCompensation(1.0f)
-		, mySmoothingIterations(0.f)
-		, myPathCostType(ESVONPathCostType::EUCLIDEAN)
+		  , myUseUnitCost(false)
+		  , myUnitCost(1.0f)
+		  , myEstimateWeight(1.0f)
+		  , myNodeSizeCompensation(1.0f)
+		  , mySmoothingIterations(0.f)
+		  , myPathCostType(ESVONPathCostType::EUCLIDEAN)
 	{
 	}
 };
@@ -37,9 +38,14 @@ class UESVON_API SVONPathFinder
 public:
 	SVONPathFinder(UWorld* aWorld, const ASVONVolume& aVolume, SVONPathFinderSettings& aSettings)
 		: myVolume(aVolume)
-		, mySettings(aSettings)
-		, myWorld(aWorld){};
-	~SVONPathFinder(){};
+		  , mySettings(aSettings)
+		  , myWorld(aWorld)
+	{
+	};
+
+	~SVONPathFinder()
+	{
+	};
 
 	/* Performs an A* search from start to target navlink */
 	int FindPath(const SVONLink& aStart, const SVONLink& aTarget, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath);

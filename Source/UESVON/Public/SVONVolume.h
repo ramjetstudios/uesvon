@@ -4,10 +4,7 @@
 #include "UESVON/Public/SVONDefines.h"
 #include "UESVON/Public/SVONLeafNode.h"
 #include "UESVON/Public/SVONNode.h"
-#include "UESVON/Public/UESVON.h"
-
-#include <Runtime/Engine/Classes/GameFramework/Volume.h>
-
+#include "GameFramework/Volume.h"
 #include "SVONVolume.generated.h"
 
 UENUM(BlueprintType)
@@ -27,14 +24,18 @@ class UESVON_API ASVONVolume : public AVolume
 	GENERATED_BODY()
 
 public:
-
 	ASVONVolume(const FObjectInitializer& ObjectInitializer);
 
 	//~ Begin AActor Interface
 	void BeginPlay() override;
 	void PostRegisterAllComponents() override;
 	void PostUnregisterAllComponents() override;
-	bool ShouldTickIfViewportsOnly() const override { return true; }
+
+	bool ShouldTickIfViewportsOnly() const override
+	{
+		return true;
+	}
+
 	//~ End AActor Interface
 
 #if WITH_EDITOR
@@ -52,7 +53,11 @@ public:
 	void ClearData();
 
 	bool IsReadyForNavigation() const;
-	const TArray<SVONNode>& GetLayer(layerindex_t aLayer) const { return myData.myLayers[aLayer]; };
+
+	const TArray<SVONNode>& GetLayer(layerindex_t aLayer) const
+	{
+		return myData.myLayers[aLayer];
+	};
 	const SVONNode& GetNode(const SVONLink& aLink) const;
 	const SVONLeafNode& GetLeafNode(nodeindex_t aIndex) const;
 	bool GetLinkPosition(const SVONLink& aLink, FVector& oPosition) const;
@@ -60,7 +65,11 @@ public:
 	void GetLeafNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNeighbours) const;
 	void GetNeighbours(const SVONLink& aLink, TArray<SVONLink>& oNeighbours) const;
 	float GetVoxelSize(layerindex_t aLayer) const;
-	const uint8 GetMyNumLayers() const { return myNumLayers; }
+
+	const uint8 GetMyNumLayers() const
+	{
+		return myNumLayers;
+	}
 
 	// Debug Info
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UESVON")
@@ -103,7 +112,10 @@ private:
 	// Used for defining debug visualiation range
 	FVector myDebugPosition;
 
-	TArray<SVONNode>& GetLayer(layerindex_t aLayer) { return myData.myLayers[aLayer]; };
+	TArray<SVONNode>& GetLayer(layerindex_t aLayer)
+	{
+		return myData.myLayers[aLayer];
+	};
 
 	bool myIsReadyForNavigation;
 

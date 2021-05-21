@@ -1,17 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "UESVON/Public/SVONNavigationComponent.h"
+#include "UESVON.h"
+#include "DrawDebugHelpers.h"
+#include "SVONMediator.h"
+#include "Kismet/GameplayStatics.h"
 #include "UESVON/Public/SVONFindPathTask.h"
 #include "UESVON/Public/SVONLink.h"
 #include "UESVON/Public/SVONNavigationPath.h"
 #include "UESVON/Public/SVONPathFinder.h"
 #include "UESVON/Public/SVONVolume.h"
-
-#include <Runtime/Engine/Public/DrawDebugHelpers.h>
-#include <Runtime/Engine/Classes/GameFramework/Actor.h>
-#include <Runtime/Engine/Classes/Kismet/GameplayStatics.h>
-#include <Runtime/Engine/Classes/Components/LineBatchComponent.h>
-#include <Runtime/NavigationSystem/Public/NavigationData.h>
 
 // Sets default values for this component's properties
 USVONNavigationComponent::USVONNavigationComponent(const FObjectInitializer& ObjectInitializer)
@@ -86,6 +84,7 @@ SVONLink USVONNavigationComponent::GetNavPosition(FVector& aPosition) const
 
 		myLastLocation = navLink;
 
+#if WITH_EDITORONLY_DATA
 		if (DebugPrintCurrentPosition)
 		{
 			const SVONNode& currentNode = myCurrentNavVolume->GetNode(navLink);
@@ -96,6 +95,7 @@ SVONLink USVONNavigationComponent::GetNavPosition(FVector& aPosition) const
 			DrawDebugLine(GetWorld(), GetPawnPosition(), currentNodePosition, isValid ? FColor::Green : FColor::Red, false, -1.f, 0, 10.f);
 			DrawDebugString(GetWorld(), GetPawnPosition() + FVector(0.f, 0.f, -50.f), navLink.ToString(), NULL, FColor::Yellow, 0.01f);
 		}
+#endif
 	}
 	return navLink;
 }
@@ -233,7 +233,7 @@ void USVONNavigationComponent::DebugLocalPosition(FVector& aPosition)
 		{
 			FIntVector pos;
 			SVONMediator::GetVolumeXYZ(GetPawnPosition(), *myCurrentNavVolume, i, pos);
-			uint_fast64_t code = libmorton::morton3D_64_encode(pos.X, pos.Y, pos.Z);
+			uint64 code = libmorton::morton3D_64_encode(pos.X, pos.Y, pos.Z);
 			FString codeString = FString::FromInt(code);
 			DrawDebugString(GetWorld(), GetPawnPosition() + FVector(0.f, 0.f, i * 50.0f), pos.ToString() + " - " + codeString, NULL, FColor::White, 0.01f);
 		}

@@ -2,7 +2,7 @@
 #include "UESVON/Public/SVONLink.h"
 #include "UESVON/Public/SVONNode.h"
 #include "UESVON/Public/SVONVolume.h"
-
+#include "UESVON.h"
 #include "SVONNavigationPath.h"
 
 int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath)
@@ -25,7 +25,6 @@ int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, cons
 
 	while (myOpenSet.Num() > 0)
 	{
-
 		float lowestScore = FLT_MAX;
 		for (SVONLink& link : myOpenSet)
 		{
@@ -54,7 +53,6 @@ int SVONPathFinder::FindPath(const SVONLink& aStart, const SVONLink& aGoal, cons
 
 		if (myCurrent.GetLayerIndex() == 0 && currentNode.myFirstChild.IsValid())
 		{
-
 			myVolume.GetLeafNeighbours(myCurrent, neighbours);
 		}
 		else
@@ -85,12 +83,10 @@ float SVONPathFinder::HeuristicScore(const SVONLink& aStart, const SVONLink& aTa
 	myVolume.GetLinkPosition(aTarget, endPos);
 	switch (mySettings.myPathCostType)
 	{
-	case ESVONPathCostType::MANHATTAN:
-		score = FMath::Abs(endPos.X - startPos.X) + FMath::Abs(endPos.Y - startPos.Y) + FMath::Abs(endPos.Z - startPos.Z);
+	case ESVONPathCostType::MANHATTAN: score = FMath::Abs(endPos.X - startPos.X) + FMath::Abs(endPos.Y - startPos.Y) + FMath::Abs(endPos.Z - startPos.Z);
 		break;
 	case ESVONPathCostType::EUCLIDEAN:
-	default:
-		score = (startPos - endPos).Size();
+	default: score = (startPos - endPos).Size();
 		break;
 	}
 
@@ -110,7 +106,6 @@ float SVONPathFinder::GetCost(const SVONLink& aStart, const SVONLink& aTarget)
 	}
 	else
 	{
-
 		FVector startPos(0.f), endPos(0.f);
 		const SVONNode& startNode = myVolume.GetNode(aStart);
 		const SVONNode& endNode = myVolume.GetNode(aTarget);
@@ -160,7 +155,6 @@ void SVONPathFinder::ProcessLink(const SVONLink& aNeighbour)
 
 void SVONPathFinder::BuildPath(TMap<SVONLink, SVONLink>& aCameFrom, SVONLink aCurrent, const FVector& aStartPos, const FVector& aTargetPos, FSVONNavPathSharedPtr* oPath)
 {
-
 	FSVONPathPoint pos;
 
 	TArray<FSVONPathPoint> points;
@@ -202,27 +196,8 @@ void SVONPathFinder::BuildPath(TMap<SVONLink, SVONLink>& aCameFrom, SVONLink aCu
 		points.Emplace(aStartPos, myStart.GetLayerIndex());
 	}
 
-	//Smooth_Chaikin(points, mySettings.mySmoothingIterations);
-
 	for (int i = points.Num() - 1; i >= 0; i--)
 	{
 		oPath->Get()->GetPathPoints().Add(points[i]);
 	}
 }
-
-//void SVONPathFinder::Smooth_Chaikin(TArray<FVector>& somePoints, int aNumIterations)
-//{
-//	for (int i = 0; i < aNumIterations; i++)
-//	{
-//		for (int j = 0; j < somePoints.Num() - 1; j += 2)
-//		{
-//			FVector start = somePoints[j];
-//			FVector end = somePoints[j + 1];
-//			if (j > 0)
-//				somePoints[j] = FMath::Lerp(start, end, 0.25f);
-//			FVector secondVal = FMath::Lerp(start, end, 0.75f);
-//			somePoints.Insert(secondVal, j + 1);
-//		}
-//		somePoints.RemoveAt(somePoints.Num() - 1);
-//	}
-//}

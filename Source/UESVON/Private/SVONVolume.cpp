@@ -1,14 +1,8 @@
 #include "UESVON/Public/SVONVolume.h"
-
-#include <Runtime/Engine/Classes/Components/BrushComponent.h>
-#include <Runtime/Engine/Classes/Components/LineBatchComponent.h>
-#include <Runtime/Engine/Classes/Engine/CollisionProfile.h>
-#include <Runtime/Engine/Classes/GameFramework/PlayerController.h>
-#include <Runtime/Engine/Public/DrawDebugHelpers.h>
-
-#include <chrono>
-
-using namespace std::chrono;
+#include "UESVON.h"
+#include "DrawDebugHelpers.h"
+#include "Components/BrushComponent.h"
+#include "Components/LineBatchComponent.h"
 
 ASVONVolume::ASVONVolume(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -64,8 +58,7 @@ bool ASVONVolume::Generate()
 	FlushPersistentDebugLines(GetWorld());
 
 	// Setup timing
-	milliseconds startMs = duration_cast<milliseconds>(
-		system_clock::now().time_since_epoch());
+	double startTime = FPlatformTime::Seconds();
 
 #endif // WITH_EDITOR
 
@@ -104,10 +97,7 @@ bool ASVONVolume::Generate()
 
 #if WITH_EDITOR
 
-	int32 buildTime = (duration_cast<milliseconds>(
-						   system_clock::now().time_since_epoch()) -
-					   startMs)
-						  .count();
+	double endTime = FPlatformTime::Seconds();
 
 	int32 totalNodes = 0;
 
@@ -119,7 +109,7 @@ bool ASVONVolume::Generate()
 	int32 totalBytes = sizeof(SVONNode) * totalNodes;
 	totalBytes += sizeof(SVONLeafNode) * myData.myLeafNodes.Num();
 
-	UE_LOG(UESVON, Display, TEXT("Generation Time : %d"), buildTime);
+	UE_LOG(UESVON, Display, TEXT("Generation Time : %f"), endTime - startTime);
 	UE_LOG(UESVON, Display, TEXT("Total Layers-Nodes : %d-%d"), myNumLayers, totalNodes);
 	UE_LOG(UESVON, Display, TEXT("Total Leaf Nodes : %d"), myData.myLeafNodes.Num());
 	UE_LOG(UESVON, Display, TEXT("Total Size (bytes): %d"), totalBytes);
@@ -184,7 +174,7 @@ bool ASVONVolume::FirstPassRasterize()
 
 bool ASVONVolume::GetNodePosition(layerindex_t aLayer, mortoncode_t aCode, FVector& oPosition) const
 {
-	float voxelSize = GetVoxelSize(aLayer);
+	const float voxelSize = GetVoxelSize(aLayer);
 	uint_fast32_t x, y, z;
 	libmorton::morton3D_64_decode(aCode, x, y, z);
 	oPosition = myOrigin - myExtent + FVector(x * voxelSize, y * voxelSize, z * voxelSize) + FVector(voxelSize * 0.5f);

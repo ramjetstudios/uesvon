@@ -1,13 +1,10 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 #pragma once
 
+#include "Navigation/PathFollowingComponent.h"
+#include "Tasks/AITask.h"
 #include "UESVON/Public/SVONDefines.h"
 #include "UESVON/Public/SVONTypes.h"
-
-#include <Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h>
-#include <Runtime/AIModule/Classes/Tasks/AITask.h>
-#include <Runtime/Core/Public/HAL/ThreadSafeBool.h>
-
 #include "AITask_SVONMoveTo.generated.h"
 
 class AAIController;

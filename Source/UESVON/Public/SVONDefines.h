@@ -5,8 +5,8 @@
 typedef uint8 layerindex_t;
 typedef int32 nodeindex_t;
 typedef uint8 subnodeindex_t;
-typedef uint_fast64_t mortoncode_t;
-typedef uint_fast32_t posint_t;
+typedef uint64 mortoncode_t;
+typedef uint32 posint_t;
 
 UENUM(BlueprintType)
 enum class EBuildTrigger : uint8

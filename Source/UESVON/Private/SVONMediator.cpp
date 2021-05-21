@@ -4,8 +4,6 @@
 #include "UESVON/Public/SVONLink.h"
 #include "UESVON/Public/SVONVolume.h"
 
-#include <Runtime/Engine/Public/DrawDebugHelpers.h>
-
 bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolume& aVolume, SVONLink& oLink)
 {
 	// Position is outside the volume, no can do
@@ -36,7 +34,7 @@ bool SVONMediator::GetLinkFromPosition(const FVector& aPosition, const ASVONVolu
 
 		FIntVector voxel;
 		GetVolumeXYZ(aPosition, aVolume, layerIndex, voxel);
-		uint_fast32_t x, y, z;
+		uint32 x, y, z;
 		x = voxel.X;
 		y = voxel.Y;
 		z = voxel.Z;

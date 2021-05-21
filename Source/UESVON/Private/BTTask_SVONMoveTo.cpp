@@ -1,16 +1,14 @@
 
 #include "UESVON/Public/BTTask_SVONMoveTo.h"
+#include "AIController.h"
+#include "AIResources.h"
+#include "AISystem.h"
+#include "GameplayTasksComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "UESVON/Public/AITask_SVONMoveTo.h"
-
-#include <Runtime/AIModule/Classes/AIController.h>
-#include <Runtime/AIModule/Classes/AISystem.h>
-#include <Runtime/AIModule/Classes/BehaviorTree/Blackboard/BlackboardKeyType_Object.h>
-#include <Runtime/AIModule/Classes/BehaviorTree/Blackboard/BlackboardKeyType_Vector.h>
-#include <Runtime/AIModule/Classes/BehaviorTree/BlackboardComponent.h>
-#include <Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h>
-
-#include <Runtime/Engine/Classes/GameFramework/Actor.h>
-#include <Runtime/Engine/Public/VisualLogger/VisualLogger.h>
+#include "VisualLogger/VisualLogger.h"
 
 UBTTask_SVONMoveTo::UBTTask_SVONMoveTo(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -250,7 +248,7 @@ FString UBTTask_SVONMoveTo::GetStaticDescription() const
 {
 	FString KeyDesc("invalid");
 	if (BlackboardKey.SelectedKeyType == UBlackboardKeyType_Object::StaticClass() ||
-		BlackboardKey.SelectedKeyType == UBlackboardKeyType_Vector::StaticClass())
+	    BlackboardKey.SelectedKeyType == UBlackboardKeyType_Vector::StaticClass())
 	{
 		KeyDesc = BlackboardKey.SelectedKeyName.ToString();
 	}
